@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
 import { useThemeStore, useAppStore } from '../context/store';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, Transition } from '@headlessui/react';
+import { MapPinIcon, BellIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
+import useSound from 'use-sound';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -13,8 +16,25 @@ const Navbar: React.FC = () => {
   const { isDarkMode, toggleDarkMode } = useThemeStore();
   const { isMenuOpen, toggleMenu, closeMenu } = useAppStore();
   const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isListening, setIsListening] = useState(false);
+  const [userLocation, setUserLocation] = useState<string>('');
+  const [notificationCount, setNotificationCount] = useState(0);
 
-  // Track scroll position to change navbar appearance
+  // Play interaction sounds
+  const [playHover] = useSound('/sounds/hover.mp3', { volume: 0.5 });
+  const [playClick] = useSound('/sounds/click.mp3', { volume: 0.5 });
+
+  // Categories for the dropdown
+  const categories = [
+    { name: 'Concerts', icon: '🎵' },
+    { name: 'Conferences', icon: '💼' },
+    { name: 'Sports', icon: '⚽' },
+    { name: 'Cultural', icon: '🎭' },
+    { name: 'Tech', icon: '💻' },
+    { name: 'Food & Drink', icon: '🍷' },
+  ];
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 0);
@@ -22,6 +42,54 @@ const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    // Get user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const response = await fetch(
+              `https://api.opencagedata.com/geocode/v1/json?q=${position.coords.latitude}+${position.coords.longitude}&key=YOUR_API_KEY`
+            );
+            const data = await response.json();
+            if (data.results?.[0]?.components?.city) {
+              setUserLocation(data.results[0].components.city);
+            }
+          } catch (error) {
+            console.error('Error fetching location:', error);
+          }
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+        }
+      );
+    }
+  }, []);
+
+  // Voice search handler
+  const handleVoiceSearch = () => {
+    if ('webkitSpeechRecognition' in window) {
+      const recognition = new (window as any).webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchQuery(transcript);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -51,55 +119,110 @@ const Navbar: React.FC = () => {
       className={`fixed w-full z-50 transition-all duration-300 ${
         scrolled 
           ? isDarkMode
-            ? 'bg-gray-900/95 backdrop-blur-lg shadow-lg border-b border-gray-800'
-            : 'bg-white/95 backdrop-blur-lg shadow-lg'
+            ? 'bg-gray-900/75 backdrop-blur-lg shadow-lg border-b border-gray-800'
+            : 'bg-white/75 backdrop-blur-lg shadow-lg'
           : 'bg-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          <div className="flex items-center">
-            <Link to="/" className="flex-shrink-0 flex items-center">
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="flex items-center"
+          {/* Logo */}
+          <Link to="/" className="flex-shrink-0">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onHoverStart={() => playHover()}
+              onClick={() => playClick()}
+            >
+              <span className="text-2xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                Event<span className="font-extrabold">Hub</span>
+              </span>
+            </motion.div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            <Link to="/" className="nav-link">Home</Link>
+            
+            {/* Discover Dropdown */}
+            <Menu as="div" className="relative">
+              <Menu.Button className="nav-link">
+                Discover
+              </Menu.Button>
+              <Transition
+                enter="transition duration-100 ease-out"
+                enterFrom="transform scale-95 opacity-0"
+                enterTo="transform scale-100 opacity-100"
+                leave="transition duration-75 ease-out"
+                leaveFrom="transform scale-100 opacity-100"
+                leaveTo="transform scale-95 opacity-0"
               >
-                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                  Event<span className="font-extrabold">Hub</span>
-                </span>
-              </motion.div>
-            </Link>
+                <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-left bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="py-1">
+                    {categories.map((category) => (
+                      <Menu.Item key={category.name}>
+                        {({ active }) => (
+                          <button
+                            className={`${
+                              active ? 'bg-gray-100 dark:bg-gray-700' : ''
+                            } group flex w-full items-center px-4 py-2 text-sm`}
+                            onClick={() => playClick()}
+                          >
+                            <span className="mr-3">{category.icon}</span>
+                            {category.name}
+                          </button>
+                        )}
+                      </Menu.Item>
+                    ))}
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
 
-            <div className="hidden md:ml-10 md:flex md:space-x-6">
-              {mainNavLinks.map((link) => (
-                <motion.div
-                  key={link.path}
-                  whileHover={{ y: -2 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <Link
-                    to={link.path}
-                    className={`text-sm font-medium ${
-                      isActive(link.path)
-                        ? 'text-indigo-600 dark:text-indigo-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
-                    }`}
-                  >
-                    {link.name}
-                  </Link>
-                </motion.div>
-              ))}
+            <Link to="/trending" className="nav-link">Trending</Link>
+
+            {/* Search Bar */}
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search events..."
+                className="w-64 px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+              <button
+                onClick={handleVoiceSearch}
+                className="absolute right-3 text-gray-500 hover:text-indigo-500"
+              >
+                <MicrophoneIcon className={`h-5 w-5 ${isListening ? 'text-red-500 animate-pulse' : ''}`} />
+              </button>
             </div>
-          </div>
 
-          <div className="hidden md:flex md:items-center md:space-x-4">
+            {/* Location Selector */}
+            <div className="flex items-center text-gray-600 dark:text-gray-300">
+              <MapPinIcon className="h-5 w-5 mr-1" />
+              <span>{userLocation || 'Set Location'}</span>
+            </div>
+
+            {/* Notifications */}
+            {user && (
+              <button className="relative">
+                <BellIcon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
+                {notificationCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {notificationCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {/* Theme Toggle */}
             <motion.button
               whileHover={{ scale: 1.1, rotate: 15 }}
               whileTap={{ scale: 0.9 }}
               onClick={toggleDarkMode}
-              className="p-2 text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 focus:outline-none"
-              aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+              className="p-2 text-gray-700 dark:text-gray-300"
+              onHoverStart={() => playHover()}
             >
               {isDarkMode ? (
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -112,6 +235,7 @@ const Navbar: React.FC = () => {
               )}
             </motion.button>
 
+            {/* Auth Section */}
             {user ? (
               <div className="flex items-center space-x-4">
                 <motion.div 

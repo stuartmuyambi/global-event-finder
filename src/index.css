@@ -90,3 +90,127 @@ button:focus-visible {
     text-wrap: balance;
   }
 }
+
+@layer components {
+  .nav-link {
+    @apply text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors;
+  }
+}
+
+/* Custom Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glass Morphism Effects */
+.glass-morphism {
+  @apply bg-white/75 dark:bg-gray-900/75 backdrop-blur-lg;
+}
+
+/* Haptic Feedback Integration */
+@media (hover: hover) {
+  .haptic-feedback {
+    transition: transform 0.2s ease;
+  }
+  
+  .haptic-feedback:hover {
+    transform: scale(1.02);
+  }
+  
+  .haptic-feedback:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Smooth Transitions */
+.page-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* Advanced Input Styles */
+.modern-input {
+  @apply w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200;
+}
+
+/* 3D Card Effect */
+.card-3d {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.card-3d:hover {
+  transform: rotateX(5deg) rotateY(5deg);
+}
+
+/* Dynamic Background Pattern */
+.dynamic-bg {
+  background-image: radial-gradient(circle at 1px 1px, theme(colors.gray.200) 1px, transparent 0);
+  background-size: 40px 40px;
+}
+
+.dark .dynamic-bg {
+  background-image: radial-gradient(circle at 1px 1px, theme(colors.gray.800) 1px, transparent 0);
+}
+
+/* Gradient Text Animation */
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r;
+  background-size: 200% 200%;
+  animation: gradient 8s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Modern Focus Styles */
+.focus-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900;
+}
+
+/* Responsive Typography */
+@screen sm {
+  html {
+    font-size: 14px;
+  }
+}
+
+@screen md {
+  html {
+    font-size: 16px;
+  }
+}
+
+@screen lg {
+  html {
+    font-size: 18px;
+  }
+}
