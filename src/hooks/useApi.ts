@@ -1,106 +1,89 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  query, 
+  where, 
+  getDocs, 
+  addDoc, 
+  updateDoc, 
+  deleteDoc, 
+  doc, 
+  orderBy,
+  CollectionReference,
+  DocumentData,
+  QueryConstraint
+} from 'firebase/firestore';
 
 // Generic fetch data hook
 export const useFetchData = <T>(
   queryKey: string[],
-  url: string,
-  options?: RequestInit
+  collection: CollectionReference<DocumentData>,
+  constraints: QueryConstraint[] = []
 ) => {
   return useQuery({
     queryKey,
-    queryFn: async (): Promise<T> => {
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        ...options,
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-      
-      return response.json();
+    queryFn: async (): Promise<T[]> => {
+      const q = query(collection, ...constraints);
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as T[];
     },
   });
 };
 
 // Generic create data hook
-export const useCreateData = <T, S>(url: string) => {
+export const useCreateData = <T extends Record<string, any>>(
+  collection: CollectionReference<DocumentData>,
+  queryKey: string[]
+) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (data: T): Promise<S> => {
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-      
-      return response.json();
+    mutationFn: async (data: T) => {
+      const docRef = await addDoc(collection, data);
+      return { id: docRef.id, ...data };
     },
     onSuccess: () => {
-      // Invalidate and refetch relevant queries after a successful mutation
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 };
 
 // Generic update data hook
-export const useUpdateData = <T, S>(url: string) => {
+export const useUpdateData = <T extends Record<string, any>>(
+  collection: CollectionReference<DocumentData>,
+  queryKey: string[]
+) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: T }): Promise<S> => {
-      const response = await fetch(`${url}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-      
-      return response.json();
+    mutationFn: async ({ id, data }: { id: string; data: Partial<T> }) => {
+      const docRef = doc(collection, id);
+      await updateDoc(docRef, data);
+      return { id, ...data };
     },
     onSuccess: () => {
-      // Invalidate and refetch relevant queries after a successful mutation
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 };
 
 // Generic delete data hook
-export const useDeleteData = <T>(url: string) => {
+export const useDeleteData = (
+  collection: CollectionReference<DocumentData>,
+  queryKey: string[]
+) => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (id: string): Promise<T> => {
-      const response = await fetch(`${url}/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
-      
-      return response.json();
+    mutationFn: async (id: string) => {
+      const docRef = doc(collection, id);
+      await deleteDoc(docRef);
+      return id;
     },
     onSuccess: () => {
-      // Invalidate and refetch relevant queries after a successful mutation
-      queryClient.invalidateQueries();
+      queryClient.invalidateQueries({ queryKey });
     },
   });
 };

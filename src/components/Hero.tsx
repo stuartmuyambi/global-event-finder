@@ -1,173 +1,155 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-
-interface SearchFilters {
-  location: string;
-  category: string;
-}
+import { useAuth } from '@/context/AuthContext';
 
 const Hero: React.FC = () => {
-  const [searchFilters, setSearchFilters] = useState<SearchFilters>({
-    location: '',
-    category: ''
-  });
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
-  const categories = [
-    'All Categories',
-    'Music',
-    'Sports',
-    'Arts',
-    'Food',
-    'Business',
-    'Technology'
+  // Feature highlights to show only for non-authenticated users
+  const features = [
+    { icon: '🎯', title: 'Smart Search', description: 'Find events that match your interests' },
+    { icon: '🌍', title: 'Global Events', description: 'Discover events worldwide' },
+    { icon: '📱', title: 'Mobile Ready', description: 'Access from any device' },
+    { icon: '🎫', title: 'Easy Booking', description: 'Secure your spot instantly' },
   ];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1
-      }
-    }
+  const handleGetStarted = () => {
+    navigate('/register');
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.5
-      }
-    }
+  const handleSignIn = () => {
+    navigate('/login');
   };
 
   return (
-    <div className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-      {/* Background gradient and overlay */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-700"
-        style={{
-          backgroundImage: `url('/images/hero-bg.jpg')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundBlendMode: 'overlay'
-        }}
-      >
-        <div className="absolute inset-0 bg-black/50" />
+    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col overflow-hidden bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+      {/* Abstract Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-to-br from-purple-100/30 to-indigo-100/30 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-full transform rotate-12 blur-3xl" />
+        <div className="absolute -bottom-1/2 -left-1/2 w-full h-full bg-gradient-to-tr from-pink-100/30 to-cyan-100/30 dark:from-pink-900/20 dark:to-cyan-900/20 rounded-full transform -rotate-12 blur-3xl" />
       </div>
 
-      {/* Content */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 text-center"
-      >
-        <motion.h1
-          variants={itemVariants}
-          className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight"
-        >
-          Discover Events Happening Near You <br />& Around the World
-        </motion.h1>
-
-        <motion.p
-          variants={itemVariants}
-          className="text-xl text-gray-200 mb-12 max-w-2xl mx-auto"
-        >
-          Find and join exciting events that match your interests. Connect with people who share your passions.
-        </motion.p>
-
-        {/* Search Section */}
+      {/* Hero Content */}
+      <div className="relative z-10 flex flex-col items-center justify-center flex-grow px-4 sm:px-6 lg:px-8 pt-16 pb-8">
         <motion.div
-          variants={itemVariants}
-          className="max-w-4xl mx-auto bg-white/10 backdrop-blur-md p-6 rounded-2xl shadow-xl"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-center max-w-5xl mx-auto"
         >
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-            {/* Location Input */}
-            <div className="md:col-span-5">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  value={searchFilters.location}
-                  onChange={(e) => setSearchFilters(prev => ({ ...prev, location: e.target.value }))}
-                  placeholder="Location"
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-white/10 backdrop-blur text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+          {/* Main Heading */}
+          <motion.h1
+            className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+          >
+            <span className="inline-block text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 dark:from-indigo-400 dark:via-purple-400 dark:to-pink-400">
+              Discover & Connect
+            </span>
+            <br />
+            <span className="text-gray-900 dark:text-white">
+              Through Amazing Events
+            </span>
+          </motion.h1>
 
-            {/* Category Select */}
-            <div className="md:col-span-4">
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" />
-                  </svg>
-                </div>
-                <select
-                  value={searchFilters.category}
-                  onChange={(e) => setSearchFilters(prev => ({ ...prev, category: e.target.value }))}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-white/10 backdrop-blur text-white appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          {/* Subtitle */}
+          <motion.p
+            className="mt-6 text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            Join a vibrant community of event-goers. Find and organize events that match your interests, 
+            from local meetups to global conferences.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            className="mt-10 flex flex-col sm:flex-row justify-center gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            {!user ? (
+              <>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleGetStarted}
+                  className="px-8 py-4 text-lg font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  {categories.map((category) => (
-                    <option key={category} value={category} className="text-gray-900">
-                      {category}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            {/* Search Button */}
-            <div className="md:col-span-3">
+                  Start for Free
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleSignIn}
+                  className="px-8 py-4 text-lg font-medium rounded-xl text-gray-700 dark:text-white bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-lg hover:shadow-xl transform transition-all border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                >
+                  Sign In
+                </motion.button>
+              </>
+            ) : (
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full px-8 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors duration-200"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => navigate('/dashboard')}
+                className="px-8 py-4 text-lg font-medium rounded-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-lg hover:shadow-xl transform transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Find Events
+                Go to Dashboard
               </motion.button>
-            </div>
-          </div>
-        </motion.div>
+            )}
+          </motion.div>
 
-        {/* Quick Stats */}
-        <motion.div
-          variants={containerVariants}
-          className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto"
-        >
-          {[
-            { label: 'Active Events', value: '2,000+' },
-            { label: 'Categories', value: '50+' },
-            { label: 'Countries', value: '100+' },
-            { label: 'Happy Users', value: '1M+' }
-          ].map((stat) => (
+          {/* Feature Highlights - Only show when not authenticated */}
+          {!user && (
             <motion.div
-              key={stat.label}
-              variants={itemVariants}
-              className="text-center"
+              className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto px-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
             >
-              <motion.p
-                className="text-3xl font-bold text-white mb-2"
-                initial={{ scale: 1 }}
-                whileHover={{ scale: 1.1 }}
-              >
-                {stat.value}
-              </motion.p>
-              <p className="text-gray-300">{stat.label}</p>
+              {features.map((feature, index) => (
+                <motion.div
+                  key={feature.title}
+                  className="relative p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg dark:shadow-gray-800/50 border border-gray-100 dark:border-gray-700"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 * index }}
+                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                >
+                  <span className="text-3xl mb-4 block">{feature.icon}</span>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              ))}
             </motion.div>
-          ))}
+          )}
         </motion.div>
-      </motion.div>
+      </div>
+
+      {/* Decorative Wave Bottom */}
+      <div className="relative mt-auto">
+        <svg
+          className="w-full h-auto"
+          viewBox="0 0 1440 200"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 70C840 80 960 100 1080 110C1200 120 1320 120 1380 120L1440 120V200H1380C1320 200 1200 200 1080 200C960 200 840 200 720 200C600 200 480 200 360 200C240 200 120 200 60 200H0V120Z"
+            className="fill-white dark:fill-gray-900"
+          />
+        </svg>
+      </div>
     </div>
   );
 };

@@ -1,7 +1,8 @@
-import React, { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './context/AuthContext';
+import { useThemeStore } from './context/store';
 
 // Layout
 import Layout from './components/Layout';
@@ -29,6 +30,21 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  const { setDarkMode } = useThemeStore();
+
+  useEffect(() => {
+    // Set initial dark mode based on system preference
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setDarkMode(isDark);
+
+    // Listen for system dark mode changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => setDarkMode(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [setDarkMode]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>

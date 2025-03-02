@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../utils/firebase';
 
 interface OnboardingStep {
   title: string;
@@ -65,6 +68,36 @@ const OnboardingFlow: React.FC = () => {
   const prevStep = () => {
     if (step > 0) {
       setStep(prev => prev - 1);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      // Register the user with Firebase
+      await register(formData.email, formData.password);
+      
+      if (auth.currentUser) {
+        // Update user profile
+        await updateProfile(auth.currentUser, {
+          displayName: formData.name
+        });
+
+        // Store additional user data in Firestore
+        await setDoc(doc(db, 'users', auth.currentUser.uid), {
+          name: formData.name,
+          location: formData.location,
+          interests: formData.interests,
+          notifications: formData.notifications,
+          email: formData.email,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      // Navigate to dashboard after successful registration and data storage
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Error during registration:', error);
+      // You might want to add error handling UI here
     }
   };
 
@@ -234,18 +267,7 @@ const OnboardingFlow: React.FC = () => {
           </button>
         ) : (
           <button
-            onClick={async () => {
-              try {
-                // Register the user with Firebase
-                await register(formData.email, formData.password);
-                console.log('Onboarding completed:', formData);
-                // After successful registration, navigate to dashboard
-                navigate('/dashboard');
-              } catch (error) {
-                console.error('Error during registration:', error);
-                // You might want to add error handling UI here
-              }
-            }}
+            onClick={handleSubmit}
             className="ml-auto px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
           >
             Complete
