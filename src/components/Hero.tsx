@@ -53,7 +53,7 @@ const Hero: React.FC = () => {
           backgroundImage: `url('/images/hero-bg.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundBlend: 'overlay'
+          backgroundBlendMode: 'overlay'
         }}
       >
         <div className="absolute inset-0 bg-black/50" />
@@ -150,7 +150,7 @@ const Hero: React.FC = () => {
             { label: 'Categories', value: '50+' },
             { label: 'Countries', value: '100+' },
             { label: 'Happy Users', value: '1M+' }
-          ].map((stat, index) => (
+          ].map((stat) => (
             <motion.div
               key={stat.label}
               variants={itemVariants}
